@@ -187,6 +187,50 @@ redis 127.0.0.1:6379> ZRANGE sorted 0 10 WITHSCORES
 
 2.skiplist(跳跃表):跳跃表是一种有序数据结构，通过在每个节点中维持多个指向其他节点的指针，从而达到快速访问节点的目的。当ziplist条件不满足时,有序集合会使用skiplist作 为内部实现,因为此时ziplist的读写效率会下降。
 <br/><br/><br/>
+
+### Redis的发布/订阅模式
+Redis 发布订阅(pub/sub)是一种消息通信模式：发送者(pub)发送消息，订阅者(sub)接收消息。
+
+Redis 客户端可以订阅任意数量的频道。
+
+下图展示了频道 channel1 ， 以及订阅这个频道的三个客户端 —— client2 、 client5 和 client1 之间的关系：
+
+![](https://www.runoob.com/wp-content/uploads/2014/11/pubsub1.png)
+
+![](https://www.runoob.com/wp-content/uploads/2014/11/pubsub2.png)
+
+##### 实例：
+客户端A先使用subscribe命令订阅通道ch
+```
+127.0.0.1:6379> subscribe ch
+Reading messages... (press Ctrl-C to quit)
+1) "subscribe"
+2) "ch"
+3) (integer) 1
+```
+
+客户端B的发布者推送message到通道ch，1表示有一个订阅者
+
+```
+127.0.0.1:6379> publish ch 'hello, world'
+(integer) 1
+```
+
+客户端A接收到message
+
+```
+127.0.0.1:6379> subscribe ch
+Reading messages... (press Ctrl-C to quit)
+1) "subscribe"
+2) "ch"
+3) (integer) 1
+1) "message"
+2) "ch"
+3) "hello, world"
+```
+
+第一个为消息类型，第二个为通道名，第三个为消息内容
+
 ### Redis应用场景
 缓存，这是Redis相当常用的使用场景。在提升服务器性能方面非常有效；
 
@@ -205,4 +249,6 @@ Redis也不是万能的，合适的地方用它事半功倍。如果滥用可能
 
 简单总结就是数据量太大、数据访问频率非常低的业务都不适合使用Redis，数据太大会增加成本，访问频率太低，保存在内存中纯属浪费资源。
 
-![](https://user-gold-cdn.xitu.io/2018/7/20/164b614cfe3ccf53?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+![](https://i.loli.net/2020/05/02/unlIwrJ3LyjfMSU.jpg)
+
+
