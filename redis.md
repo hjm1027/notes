@@ -10,9 +10,11 @@ Redis是非关系型数据库，它不使用表，他的数据库不会预定义
 数据库的工作模式按存储方式可分为：硬盘数据库和内存数据库。Redis 将数据储存在内存里面，读写数据的时候都不会受到硬盘 I/O 速度的限制，所以速度极快。
 
 （1）硬盘数据库的工作模式：
+
 ![](https://user-gold-cdn.xitu.io/2018/8/22/1656042975b51bbe?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
 
 （2）内存数据库的工作模式：
+
 ![](https://user-gold-cdn.xitu.io/2018/8/22/16560429758ecf00?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
 
 Redis官网：https://redis.io/
