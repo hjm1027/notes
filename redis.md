@@ -266,3 +266,22 @@ Redis也不是万能的，合适的地方用它事半功倍。如果滥用可能
 可能出现提示 You need tcl 8.5 or newer in order to run the Redis test ，这是缺少 tcl 包，安装一下 tcl 就好了（如 yum install tcl）。
 
 测试完成，就可以安装 Redis 了，先 cd 到 Redis 解压文件的 src 目录，使用 make PREFIX=/usr/local/redis install 安装，可以设置 Redis 的安装位置。
+
+#### 启动与连接
+启动
+
+```
+$ redis-server /usr/local/redis/redis.conf
+$ redis-cli
+```
+
+关闭
+
+```
+$ redis-server shutdown
+```
+
+#### Go与Redis
+go连接redis的第三方库有很多，其中go-redis/redis和redigo算是用的比较多的。
+
+官方文档：https://godoc.org/github.com/go-redis/redis
