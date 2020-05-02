@@ -85,7 +85,7 @@ redis 127.0.0.1:6379> GET asd
 * int：8个字节的长整型。
 * embstr：<=39字节的字符串。
 * raw：大于39个字节的字符串
-
+<br/><br/>
 #### 2.哈希（Hash）
 Redis hash是一个string类型的field和value的映射表,每个hash可以存储 2的32次方-1键值对（40多亿）。
 
@@ -111,5 +111,98 @@ OK
 当哈希类型元素个数小于hash-max-ziplist-entries 配置(默认512个)、同时所有值都小于hash-max-ziplist-value配置(默认64 字节)时,Redis会使用ziplist作为哈希的内部实现
 
 2.hashtable（哈希表）：当哈希类型无法满足ziplist的条件时,Redis会使 用hashtable作为哈希的内部实现,因为此时ziplist的读写效率会下降,而 hashtable的读写时间复杂度为O(1)
+<br/><br/>
+#### 3.列表（List）
+列表（list）用来存储多个有序的字符串，每个字符串称为元素；一个列表可以存储2^32-1个元素。Redis中的列表支持两端插入和弹出，并可以获得指定位置（或范围）的元素，可以充当数组、队列、栈等。
 
-#### 3.
+```
+redis 127.0.0.1:6379> LPUSH list redis
+(integer) 1
+redis 127.0.0.1:6379> LPUSH list mongodb
+(integer) 2
+redis 127.0.0.1:6379> LPUSH list mysql
+(integer) 3
+redis 127.0.0.1:6379> LRANGE list 0 10
+
+1) "mysql"
+2) "mongodb"
+3) "redis"
+```
+
+##### 内部编码
+列表的内部编码可以是压缩列表（ziplist）或双向链表（linkedlist）。
+<br/><br/>
+#### 4.集合(Set)
+Redis 的 Set 是 String 类型的无序集合。集合成员是唯一的，这就意味着集合中不能出现重复的数据。<br/>
+Redis 中集合是通过哈希表实现的，所以添加，删除，查找的复杂度都是 O(1)。<br/>
+除了支持常规的增删改查，Redis还支持多个集合取交集、并集、差集。<br/>
+集合中最大的成员数为 2^32 - 1 (4294967295, 每个集合可存储40多亿个成员)。<br/>
+
+```
+redis 127.0.0.1:6379> SADD oneset redis
+(integer) 1
+redis 127.0.0.1:6379> SADD oneset mongodb
+(integer) 1
+redis 127.0.0.1:6379> SADD oneset mysql
+(integer) 1
+redis 127.0.0.1:6379> SADD oneset mysql
+(integer) 0
+redis 127.0.0.1:6379> SMEMBERS oneset
+
+1) "mysql"
+2) "mongodb"
+3) "redis"
+```
+
+##### 内部编码
+1.intset(整数集合):当集合中的元素都是整数且元素个数小于set-max-intset-entries配置(默认512个)时,Redis会选用intset来作为集合的内部实 现,从而减少内存的使用。
+2.hashtable(哈希表):当集合类型无法满足intset的条件时,Redis会使用hashtable作为集合的内部实现
+<br/><br/>
+#### 5.有序集合(Sorted set)
+有序集合与集合一样，元素都不能重复；但与集合不同的是，有序集合中的元素是有顺序的。与列表使用索引下标作为排序依据不同，有序集合为每个元素设置一个分数（score）作为排序依据。
+
+```
+redis 127.0.0.1:6379> ZADD sorted 1 redis
+(integer) 1
+redis 127.0.0.1:6379> ZADD sorted 2 mongodb
+(integer) 1
+redis 127.0.0.1:6379> ZADD sorted 3 mysql
+(integer) 1
+redis 127.0.0.1:6379> ZADD sorted 3 mysql
+(integer) 0
+redis 127.0.0.1:6379> ZADD sorted 4 mysql
+(integer) 0
+redis 127.0.0.1:6379> ZRANGE sorted 0 10 WITHSCORES
+
+1) "redis"
+2) "1"
+3) "mongodb"
+4) "2"
+5) "mysql"
+6) "4"
+```
+
+##### 内部编码
+1.ziplist(压缩列表):当有序集合的元素个数小于zset-max-ziplist- entries配置(默认128个),同时每个元素的值都小于zset-max-ziplist-value配置(默认64字节)时,Redis会用ziplist来作为有序集合的内部实现,ziplist可以有效减少内存的使用。
+
+2.skiplist(跳跃表):跳跃表是一种有序数据结构，通过在每个节点中维持多个指向其他节点的指针，从而达到快速访问节点的目的。当ziplist条件不满足时,有序集合会使用skiplist作 为内部实现,因为此时ziplist的读写效率会下降。
+<br/><br/><br/>
+### Redis应用场景
+缓存，这是Redis相当常用的使用场景。在提升服务器性能方面非常有效；
+
+排行榜，如果使用传统的关系型数据库来做这个事儿，非常的麻烦，而利用Redis的SortSet数据结构能够非常方便搞定；
+
+计算器/限速器，利用Redis中原子性的自增操作，我们可以统计类似用户点赞数、用户访问数等，这类操作如果用MySQL，频繁的读写会带来相当大的压力；限速器比较典型的使用场景是限制某个用户访问某个API的频率，常用的有抢购时，防止用户疯狂点击带来不必要的压力；
+
+好友关系，利用集合的一些命令，比如求交集、并集、差集等。可以方便搞定一些共同好友、共同爱好之类的功能；
+
+简单消息队列，除了Redis自身的发布/订阅模式，我们也可以利用List来实现一个队列机制，比如：到货通知、邮件发送之类的需求，不需要高可靠，但是会带来非常大的DB压力，完全可以用List来完成
+<br/><br/>
+
+Redis也不是万能的，合适的地方用它事半功倍。如果滥用可能导致系统的不稳定、成本增高等问题。
+
+比如，用Redis去保存用户的基本信息，虽然它能够支持持久化，但是它的持久化方案并不能保证数据绝对的落地，并且还可能带来Redis性能下降，因为持久化太过频繁会增大Redis服务的压力。
+
+简单总结就是数据量太大、数据访问频率非常低的业务都不适合使用Redis，数据太大会增加成本，访问频率太低，保存在内存中纯属浪费资源。
+
+![](https://user-gold-cdn.xitu.io/2018/7/20/164b614cfe3ccf53?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
