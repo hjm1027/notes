@@ -69,7 +69,7 @@ Redis中的数据结构是专门进行设计的，对数据操作十分简单。
 
 ### Redis常用的五种数据结构
 
-()
+(详细的语法、命令见官网https://redis.io/commands)
 
 #### 1.字符串（String）
 字符串是redis中最基础的数据结构，键都是字符串类型。
@@ -252,5 +252,17 @@ Redis也不是万能的，合适的地方用它事半功倍。如果滥用可能
 简单总结就是数据量太大、数据访问频率非常低的业务都不适合使用Redis，数据太大会增加成本，访问频率太低，保存在内存中纯属浪费资源。
 
 ![](https://i.loli.net/2020/05/02/unlIwrJ3LyjfMSU.jpg)
+<br/><br/><br/>
 
+### 使用Redis
+去Redis官网上下载 Redis 的源码包，并在Linux系统中解压。
 
+进入 Redis 的解压文件，使用 make 命令编译源码<br/>
+可能出现的错误：fatal error: jemalloc/jemalloc.h: No such file or directory<br/>
+在 Redis 的 README.md 文件中，可以找到解决方法，手动设置 MALLOC 环境。<br/>
+使用 make MALLOC=libc 命令代替 make 命令。<br/>
+
+编译好 Redis 之后，可以使用 make test 命令测试一下。<br/>
+可能出现提示 You need tcl 8.5 or newer in order to run the Redis test ，这是缺少 tcl 包，安装一下 tcl 就好了（如 yum install tcl）。
+
+测试完成，就可以安装 Redis 了，先 cd 到 Redis 解压文件的 src 目录，使用 make PREFIX=/usr/local/redis install 安装，可以设置 Redis 的安装位置。
